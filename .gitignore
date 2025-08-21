@@ -1,0 +1,4 @@
+youtube_downloader.log
+downloads/
+*.log
+__pycache__/

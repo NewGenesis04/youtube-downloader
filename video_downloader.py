@@ -120,17 +120,17 @@ def main():
                    "Enter choice (1-4): ")
 
     if choice == "1":
-        res, audio = "highest", False
+        res, audio = "highest", True
     elif choice == "2":
-        res, audio = "lowest", False
+        res, audio = "lowest", True
     elif choice == "3":
         res, audio = None, True
     elif choice == "4":
         res = input("Enter resolution (e.g., 360p, 720p, 1080p): ").strip()
-        audio = False
+        audio = True
     else:
         logging.warning("Invalid choice. Defaulting to highest resolution.")
-        res, audio = "highest", False
+        res, audio = "highest", True
 
     # Ask where to save
     custom_path = input("Enter download folder (leave blank for 'downloads'): ").strip()

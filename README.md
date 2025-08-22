@@ -48,7 +48,7 @@ Follow these steps to set up the project locally.
 
 1.  **Clone the repository:**
     ```sh
-    git clone <https://github.com/NewGenesis04/youtube-downloader.git> Youtube_Downloader
+    git clone https://github.com/NewGenesis04/youtube-downloader.git Youtube_Downloader
     cd Youtube_Downloader
     ```
 

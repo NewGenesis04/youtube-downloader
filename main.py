@@ -20,7 +20,7 @@ logging.basicConfig(
 )
 
 # ---------------------- Helpers ----------------------
-def build_ydl_opts(download_path, resolution, audio_only, progress_hooks, extract_mp3=False):
+def build_ydl_opts(download_path, resolution, audio_only, progress_hooks, sub_langs=None, auto_subs=False, extract_mp3=False):
     """
     Build yt-dlp options dictionary.
     extract_mp3=True ensures audio-only MP3 is extracted even if video was downloaded.
@@ -55,11 +55,18 @@ def build_ydl_opts(download_path, resolution, audio_only, progress_hooks, extrac
             "merge_output_format": "mp4",  # Ensures mp4 container
         }
 
+    # Add subtitle options if requested
+    if sub_langs:
+        ydl_opts['writesubtitles'] = True
+        ydl_opts['subtitleslangs'] = sub_langs
+        ydl_opts['writeautomaticsub'] = auto_subs
+        ydl_opts['subtitlesformat'] = 'srt/vtt' # Best available format between srt and vtt
+
     return ydl_opts
 
 
 # ---------------------- Core ----------------------
-def download(link, download_path="downloads", resolution="highest", audio_only=False):
+def download(link, download_path="downloads", resolution="highest", audio_only=False, sub_langs=None, auto_subs=False):
     """
     Download video+audio, and also extract MP3 if video was chosen.
     """
@@ -87,23 +94,16 @@ def download(link, download_path="downloads", resolution="highest", audio_only=F
             if audio_only:
                 # Only MP3
                 progress.update(task, description="[cyan]Downloading audio...")
-                ydl_opts = build_ydl_opts(download_path, None, True, hooks)
+                ydl_opts = build_ydl_opts(download_path, None, True, hooks, sub_langs=sub_langs, auto_subs=auto_subs)
                 with YoutubeDL(ydl_opts) as ydl:
                     logging.info(f"Fetching audio: {link}")
                     ydl.download([link])
             else:
                 # Download video first
                 progress.update(task, description="[cyan]Downloading video...")
-                ydl_opts = build_ydl_opts(download_path, resolution, False, hooks)
+                ydl_opts = build_ydl_opts(download_path, resolution, False, hooks, sub_langs=sub_langs, auto_subs=auto_subs)
                 with YoutubeDL(ydl_opts) as ydl:
                     logging.info(f"Fetching video: {link}")
-                    ydl.download([link])
-
-                # Extract MP3 separately
-                progress.update(task, description="[cyan]Extracting MP3...", completed=0, total=None)
-                ydl_opts_mp3 = build_ydl_opts(download_path, None, True, hooks, extract_mp3=True)
-                with YoutubeDL(ydl_opts_mp3) as ydl:
-                    logging.info(f"Extracting MP3 audio from: {link}")
                     ydl.download([link])
 
     except Exception as e:
@@ -145,8 +145,20 @@ def main():
     custom_path = input("Enter download folder (leave blank for 'downloads'): ").strip()
     download_path = custom_path if custom_path else "downloads"
 
+    # Ask for subtitles
+    sub_langs = None
+    auto_subs = False
+    download_subs = input("\nDownload subtitles? (y/n): ").lower().strip()
+    if download_subs == 'y':
+        langs_str = input("Enter subtitle languages (e.g., en,es-419,fr) [default: en]: ").strip()
+        if not langs_str:
+            langs_str = "en"
+        sub_langs = [lang.strip() for lang in langs_str.split(',')]
+        auto_subs_str = input("Include auto-generated subtitles? (y/n): ").lower().strip()
+        auto_subs = auto_subs_str == 'y'
+
     # Start download
-    download(link, download_path, resolution=res, audio_only=audio_only_flag)
+    download(link, download_path, resolution=res, audio_only=audio_only_flag, sub_langs=sub_langs, auto_subs=auto_subs)
 
 
 

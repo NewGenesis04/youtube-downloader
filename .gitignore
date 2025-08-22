@@ -1,6 +1,5 @@
-youtube_downloader.log
+*.log
 downloads/
-YT_Downloads/
 *.log
 __pycache__/
 .venv/

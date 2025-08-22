@@ -1,2 +1,2 @@
-tqdm
 yt-dlp
+rich
